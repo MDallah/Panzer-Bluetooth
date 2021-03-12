@@ -1,7 +1,7 @@
+import 'package:bluejoystick/SelectBondedDevicePage.dart';
 import 'package:flutter/material.dart';
-import 'package:control_pad/control_pad.dart';
-import 'package:control_pad/models/gestures.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'JoyPadPage.dart';
 
 void main() {
   runApp(MyApp());
@@ -13,29 +13,31 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData.dark(),
-      home: JoyPad(),
+      home: MainScreen(),
     );
   }
 }
 
-class JoyPad extends StatefulWidget {
+class MainScreen extends StatefulWidget {
   @override
-  _JoyPadState createState() => _JoyPadState();
+  _MainScreenState createState() => _MainScreenState();
 }
 
-class _JoyPadState extends State<JoyPad> {
+class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
-    SystemChrome.setPreferredOrientations([
+   /* SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeRight,
       DeviceOrientation.landscapeLeft,
     ]);
+
+    */
   }
 
   @override
   Widget build(BuildContext context) {
-    JoystickDirectionCallback onDirectionChanged(
+    /*JoystickDirectionCallback onDirectionChanged(
         double degrees, double distance) {
       String data =
           "Degree : ${degrees.toStringAsFixed(2)}, distance : ${distance.toStringAsFixed(2)}";
@@ -50,13 +52,31 @@ class _JoyPadState extends State<JoyPad> {
       //writeData(data);
     }
 
+     */
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Dragon 48'),
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.bluetooth),
-            onPressed: null,
+            onPressed:  () async {
+              final BluetoothDevice selectedDevice =
+              await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) {
+                    return SelectBondedDevicePage(checkAvailability: false);
+                  },
+                ),
+              );
+
+              if (selectedDevice != null) {
+                print('Connect -> selected ' + selectedDevice.address);
+                _startPlay(context, selectedDevice);
+              } else {
+                print('Connect -> no device selected');
+              }
+            },
           ),
         ],
       ),
@@ -64,12 +84,7 @@ class _JoyPadState extends State<JoyPad> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
-            PadButtonsView(
-              padButtonPressedCallback: padButtonPressedCallback,
-            ),
-            JoystickView(
-              onDirectionChanged: onDirectionChanged,
-            ),
+            Text("Please get connection")
           ],
         ),
       ),
@@ -83,6 +98,15 @@ class _JoyPadState extends State<JoyPad> {
             ],
           ),
         ),
+      ),
+    );
+  }
+  void _startPlay(BuildContext context, BluetoothDevice server) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) {
+          return JoyPad(server: server);
+        },
       ),
     );
   }
