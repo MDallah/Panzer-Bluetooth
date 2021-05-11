@@ -57,22 +57,26 @@ class _JoyPadState extends State<JoyPad> {
       print(error);
     });
   }
-
+var timeToSend = 0;
   @override
   Widget build(BuildContext context) {
     JoystickDirectionCallback onDirectionChanged(double degrees,
         double distance) {
       String data =
-          "Degree : ${degrees.toStringAsFixed(2)}, distance : ${distance
-          .toStringAsFixed(2)}";
+          "${degrees.toStringAsFixed(0)}/${(distance * 10)
+          .toStringAsFixed(0)}";
       print(data);
-      // writeData(data);
-      _sendMessage(data);
+
+      timeToSend++;
+      if (timeToSend == 20 || degrees == 0 ) { // send in the 20 once
+        _sendMessage(data);
+        timeToSend = 0;
+      }
     }
 
     PadButtonPressedCallback padButtonPressedCallback(int buttonIndex,
         Gestures gesture) {
-      String data = "buttonIndex : ${buttonIndex}";
+      String data = "S${buttonIndex}";
       print(data);
       //writeData(data);
       _sendMessage(data);
