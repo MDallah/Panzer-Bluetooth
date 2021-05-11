@@ -57,29 +57,38 @@ class _JoyPadState extends State<JoyPad> {
       print(error);
     });
   }
-var timeToSend = 0;
+
+  num timeToSend = 0;
+  num timeToSendServo = 0;
+  String  status = '';
   @override
   Widget build(BuildContext context) {
-    JoystickDirectionCallback onDirectionChanged(double degrees,
-        double distance) {
+    JoystickDirectionCallback onDirectionChanged(
+        double degrees, double distance) {
       String data =
-          "${degrees.toStringAsFixed(0)}/${(distance * 10)
-          .toStringAsFixed(0)}";
+          "${degrees.toStringAsFixed(0)}/${(distance * 10).toStringAsFixed(0)}";
       print(data);
 
       timeToSend++;
-      if (timeToSend == 20 || degrees == 0 ) { // send in the 20 once
+      if (timeToSend == 20 || degrees == 0) {
+        // send in the 20 once
         _sendMessage(data);
         timeToSend = 0;
       }
     }
 
-    PadButtonPressedCallback padButtonPressedCallback(int buttonIndex,
-        Gestures gesture) {
-      String data = "S${buttonIndex}";
+    JoystickDirectionCallback onDirectionChangedServo(
+        double degrees, double distance) {
+      String data =
+          "S${degrees.toStringAsFixed(0)}/${(distance * 10).toStringAsFixed(0)}";
       print(data);
-      //writeData(data);
-      _sendMessage(data);
+
+      timeToSendServo++;
+      if (timeToSendServo == 20 || degrees == 0) {
+        // send in the 20 once
+        _sendMessage(data);
+        timeToSendServo = 0;
+      }
     }
 
     return Scaffold(
@@ -88,20 +97,50 @@ var timeToSend = 0;
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.bluetooth),
-            onPressed:null,
+            onPressed: null,
           ),
         ],
       ),
       body: Container(
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
-            PadButtonsView(
-              padButtonPressedCallback: padButtonPressedCallback,
+
+            Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  Text("Barrel"),
+                  JoystickView(
+                    onDirectionChanged: onDirectionChangedServo,
+                  ),
+                ]),
+            Image(
+              image: AssetImage('assets/tank.png'),
+              width: 200,
+              height: 200,
             ),
-            JoystickView(
-              onDirectionChanged: onDirectionChanged,
-            ),
+            Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  Text("Tank"),
+                  JoystickView(
+                    onDirectionChanged: onDirectionChanged,
+                  ),
+                ]),
+            Column(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: <Widget>[
+                  IconButton(
+                    icon: const Icon(Icons.local_fire_department),
+                    color: Colors.white,
+                    onPressed: () {_sendMessage('F');},
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.lightbulb),
+                    color: Colors.white,
+                    onPressed: () {_sendMessage('L');},
+                  ),
+                ]),
           ],
         ),
       ),
@@ -111,15 +150,17 @@ var timeToSend = 0;
           color: Colors.white10,
           child: Row(
             children: <Widget>[
-              new Text(" Status:" + ""),
+              new Text(" Status:   ${status}"),
             ],
           ),
         ),
       ),
     );
   }
+
   void _sendMessage(String text) async {
     text = text.trim();
+    status = text;
     //textEditingController.clear();
 
     if (text.length > 0) {

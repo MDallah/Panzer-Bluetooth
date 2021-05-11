@@ -81,10 +81,12 @@ class _MainScreenState extends State<MainScreen> {
         ],
       ),
       body: Container(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
-            Text("Please get connection")
+            Image(
+              image: AssetImage('assets/tank.png'),
+            ),
           ],
         ),
       ),
@@ -94,7 +96,7 @@ class _MainScreenState extends State<MainScreen> {
           color: Colors.white10,
           child: Row(
             children: <Widget>[
-              new Text(" Status:" + ""),
+              new Text(" Status:   No connection!"),
             ],
           ),
         ),
