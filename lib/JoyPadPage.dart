@@ -61,20 +61,33 @@ class _JoyPadState extends State<JoyPad> {
   num timeToSend = 0;
   num timeToSendServo = 0;
   String  status = '';
+  int t0 = DateTime.now().millisecondsSinceEpoch;
+  int t1;
+  int td;
   @override
   Widget build(BuildContext context) {
     JoystickDirectionCallback onDirectionChanged(
         double degrees, double distance) {
       String data =
-          "${degrees.toStringAsFixed(0)}/${(distance * 10).toStringAsFixed(0)}";
+          "M${degrees.toStringAsFixed(0)}/${(distance * 10).toStringAsFixed(0)}";
       print(data);
-
-      timeToSend++;
+      t1= DateTime.now().millisecondsSinceEpoch;
+      td = t1 - t0;
+      if (td>20 || degrees == 0){
+        timeToSend++;
+        if (timeToSend == 20 || degrees == 0) {
+          // send in the 20 once
+          _sendMessage(data);
+          timeToSend = 0;
+        }
+        t0 = DateTime.now().millisecondsSinceEpoch;
+      }
+     /* timeToSend++;
       if (timeToSend == 20 || degrees == 0) {
         // send in the 20 once
         _sendMessage(data);
         timeToSend = 0;
-      }
+      }*/
     }
 
     JoystickDirectionCallback onDirectionChangedServo(
@@ -82,13 +95,23 @@ class _JoyPadState extends State<JoyPad> {
       String data =
           "S${degrees.toStringAsFixed(0)}/${(distance * 10).toStringAsFixed(0)}";
       print(data);
-
-      timeToSendServo++;
+      t1= DateTime.now().millisecondsSinceEpoch;
+      td = t1 - t0;
+      if (td>20 || degrees == 0){
+        timeToSend++;
+        if (timeToSend == 20 || degrees == 0) {
+          // send in the 20 once
+          _sendMessage(data);
+          timeToSend = 0;
+        }
+        t0 = DateTime.now().millisecondsSinceEpoch;
+      }
+      /* timeToSendServo++;
       if (timeToSendServo == 20 || degrees == 0) {
         // send in the 20 once
         _sendMessage(data);
         timeToSendServo = 0;
-      }
+      } */
     }
 
     return Scaffold(
@@ -150,7 +173,7 @@ class _JoyPadState extends State<JoyPad> {
           color: Colors.white10,
           child: Row(
             children: <Widget>[
-              new Text(" Status:   ${status}"),
+              new Text(" Status:  $status"),
             ],
           ),
         ),
